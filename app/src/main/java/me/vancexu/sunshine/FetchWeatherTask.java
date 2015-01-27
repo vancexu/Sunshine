@@ -263,6 +263,8 @@ public class FetchWeatherTask extends AsyncTask<String, Void, Void> {
             urlConnection.setRequestMethod("GET");
             urlConnection.connect();
 
+            Log.d(LOG_TAG, String.valueOf(urlConnection.getResponseCode()));
+
             // Read the input stream into a String
             InputStream inputStream = urlConnection.getInputStream();
             StringBuffer buffer = new StringBuffer();
