@@ -15,6 +15,10 @@
  */
 package me.vancexu.sunshine;
 
+import android.app.AlarmManager;
+import android.app.PendingIntent;
+import android.content.Context;
+import android.content.Intent;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
@@ -36,6 +40,8 @@ import java.util.Date;
 import me.vancexu.sunshine.data.WeatherContract;
 import me.vancexu.sunshine.data.WeatherContract.LocationEntry;
 import me.vancexu.sunshine.data.WeatherContract.WeatherEntry;
+import me.vancexu.sunshine.service.SunshineService;
+import me.vancexu.sunshine.sync.SunshineSyncAdapter;
 
 
 /**
@@ -142,7 +148,7 @@ public class ForecastFragment extends Fragment implements LoaderCallbacks<Cursor
             public void onItemClick(AdapterView<?> adapterView, View view, int position, long l) {
                 Cursor cursor = mForecastAdapter.getCursor();
                 if (cursor != null && cursor.moveToPosition(position)) {
-                    ((Callback)getActivity()).onItemSelected(cursor.getString(COL_WEATHER_DATE));
+                    ((Callback) getActivity()).onItemSelected(cursor.getString(COL_WEATHER_DATE));
                 }
                 mPosition = position;
             }
@@ -171,8 +177,27 @@ public class ForecastFragment extends Fragment implements LoaderCallbacks<Cursor
     }
 
     private void updateWeather() {
+        SunshineSyncAdapter.syncImmediately(getActivity());
+
         String location = Utility.getPreferredLocation(getActivity());
-        new FetchWeatherTask(getActivity()).execute(location);
+
+        Intent alarmIntent = new Intent(getActivity(), SunshineService.AlarmReceiver.class);
+        alarmIntent.putExtra(SunshineService.LOCATION_QUERY_EXTRA, location);
+
+        //Wrap in a pending intent which only fires once.
+        PendingIntent pi = PendingIntent.getBroadcast(getActivity(), 0, alarmIntent, PendingIntent.FLAG_ONE_SHOT);//getBroadcast(context, 0, i, 0);
+
+        AlarmManager am = (AlarmManager)getActivity().getSystemService(Context.ALARM_SERVICE);
+
+        //Set the AlarmManager to wake up the system.
+        am.set(AlarmManager.RTC_WAKEUP, System.currentTimeMillis() + 5000, pi);
+
+
+//        new FetchWeatherTask(getActivity()).execute(location);
+
+//        Intent intent = new Intent(getActivity(), SunshineService.class);
+//        intent.putExtra(SunshineService.LOCATION_QUERY_EXTRA, location);
+//        getActivity().startService(intent);
     }
 
     @Override
