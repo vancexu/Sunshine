@@ -5,10 +5,8 @@ import android.content.Intent;
 import android.os.IBinder;
 import android.util.Log;
 
-import me.vancexu.sunshine.service.SunshineService;
-
 public class SunshineSyncService extends Service {
-    private static final String LOG_TAG = SunshineService.class.getSimpleName();
+    private static final String LOG_TAG = SunshineSyncService.class.getSimpleName();
     private static final Object sSyncAdapterLock = new Object();
     private static SunshineSyncAdapter sSunshineSyncAdapter = null;
 
